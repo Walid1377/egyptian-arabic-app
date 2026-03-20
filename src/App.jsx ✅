@@ -1,0 +1,129 @@
+import React, { useState } from "react";
+
+const lessons = [
+  {
+    title: "Greetings",
+    words: [
+      { prompt: "Hello", answer: "أهلاً" },
+      { prompt: "How are you?", answer: "إزيك" },
+      { prompt: "Good morning", answer: "صباح الخير" }
+    ]
+  },
+  {
+    title: "Question Words",
+    words: [
+      { prompt: "What?", answer: "إيه" },
+      { prompt: "Where?", answer: "فين" },
+      { prompt: "Why?", answer: "ليه" }
+    ]
+  }
+];
+
+function speak(text) {
+  const u = new SpeechSynthesisUtterance(text);
+  u.lang = "ar-EG";
+  window.speechSynthesis.cancel();
+  window.speechSynthesis.speak(u);
+}
+
+export default function App() {
+  const [lessonIndex, setLessonIndex] = useState(0);
+  const [wordIndex, setWordIndex] = useState(0);
+  const [input, setInput] = useState("");
+  const [show, setShow] = useState(false);
+
+  const lesson = lessons[lessonIndex];
+  const word = lesson.words[wordIndex];
+
+  const next = () => {
+    if (wordIndex < lesson.words.length - 1) {
+      setWordIndex(wordIndex + 1);
+    } else {
+      setWordIndex(0);
+    }
+    setInput("");
+    setShow(false);
+  };
+
+  const prev = () => {
+    if (wordIndex > 0) {
+      setWordIndex(wordIndex - 1);
+    }
+    setInput("");
+    setShow(false);
+  };
+
+  return (
+    <div style={{ display: "flex", fontFamily: "Arial, sans-serif", minHeight: "100vh" }}>
+      {/* Sidebar */}
+      <div style={{ width: 260, padding: 20, background: "#f1f5f9" }}>
+        <h3>Lessons</h3>
+        {lessons.map((l, i) => (
+          <div
+            key={i}
+            onClick={() => {
+              setLessonIndex(i);
+              setWordIndex(0);
+              setInput("");
+              setShow(false);
+            }}
+            style={{
+              padding: 12,
+              marginBottom: 10,
+              cursor: "pointer",
+              borderRadius: 10,
+              background: i === lessonIndex ? "#0f172a" : "white",
+              color: i === lessonIndex ? "white" : "black",
+              border: "1px solid #cbd5e1"
+            }}
+          >
+            {l.title}
+          </div>
+        ))}
+      </div>
+
+      {/* Main */}
+      <div style={{ flex: 1, padding: 40 }}>
+        <h2>{lesson.title}</h2>
+        <p>Card {wordIndex + 1} of {lesson.words.length}</p>
+
+        <div style={{ background: "white", padding: 24, borderRadius: 16, border: "1px solid #e2e8f0", maxWidth: 700 }}>
+          <h1>{word.prompt}</h1>
+
+          <button onClick={() => speak(word.answer)} style={{ padding: "10px 14px", borderRadius: 10, cursor: "pointer" }}>
+            🔊 Hear
+          </button>
+
+          <div style={{ marginTop: 20 }}>
+            <input
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
+              placeholder="Type answer"
+              style={{ padding: 10, width: 280, borderRadius: 10, border: "1px solid #cbd5e1" }}
+            />
+          </div>
+
+          {!show ? (
+            <div style={{ marginTop: 20 }}>
+              <button onClick={() => setShow(true)} style={{ padding: "10px 14px", borderRadius: 10, cursor: "pointer" }}>
+                Check
+              </button>
+            </div>
+          ) : (
+            <div style={{ marginTop: 20 }}>
+              <h2>{word.answer}</h2>
+              <div style={{ display: "flex", gap: 10 }}>
+                <button onClick={prev} style={{ padding: "10px 14px", borderRadius: 10, cursor: "pointer" }}>
+                  ⬅ Back
+                </button>
+                <button onClick={next} style={{ padding: "10px 14px", borderRadius: 10, cursor: "pointer" }}>
+                  Next ➡
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
